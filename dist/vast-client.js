@@ -128,7 +128,7 @@
     if (typeof Proxy === "function") return true;
 
     try {
-      Date.prototype.toString.call(Reflect.construct(Date, [], function () {}));
+      Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {}));
       return true;
     } catch (e) {
       return false;
@@ -283,8 +283,7 @@
     var URLs = resolveURLTemplates(URLTemplates, macros, options);
     URLs.forEach(function (URL) {
       if (typeof window !== 'undefined' && window !== null) {
-        var i = new Image();
-        i.src = URL;
+        fetch(URL)["catch"](function () {});
       }
     });
   }
@@ -2380,12 +2379,12 @@
   // This mock module is loaded in stead of the original NodeURLHandler module
   // when bundling the library for environments which are not node.
   // This allows us to avoid bundling useless node components and have a smaller build.
-  function get(url, options, cb) {
+  function get$2(url, options, cb) {
     cb(new Error('Please bundle the library for node to use the node urlHandler'));
   }
 
   var nodeURLHandler = {
-    get: get
+    get: get$2
   };
 
   var DEFAULT_TIMEOUT = 120000;
@@ -2468,7 +2467,7 @@
     supported: supported
   };
 
-  function get$2(url, options, cb) {
+  function get(url, options, cb) {
     // Allow skip of the options param
     if (!cb) {
       if (typeof options === 'function') {
@@ -2488,7 +2487,7 @@
   }
 
   var urlHandler = {
-    get: get$2
+    get: get
   };
 
   function createVASTResponse(_ref) {
@@ -3311,12 +3310,36 @@
         return this.vastParser;
       }
     }, {
-      key: "hasRemainingAds",
-
+      key: "lastSuccessfulAd",
+      get: function get() {
+        return this.storage.getItem('vast-client-last-successful-ad');
+      },
+      set: function set(value) {
+        this.storage.setItem('vast-client-last-successful-ad', value);
+      }
+    }, {
+      key: "totalCalls",
+      get: function get() {
+        return this.storage.getItem('vast-client-total-calls');
+      },
+      set: function set(value) {
+        this.storage.setItem('vast-client-total-calls', value);
+      }
+    }, {
+      key: "totalCallsTimeout",
+      get: function get() {
+        return this.storage.getItem('vast-client-total-calls-timeout');
+      },
+      set: function set(value) {
+        this.storage.setItem('vast-client-total-calls-timeout', value);
+      }
       /**
        * Returns a boolean indicating if there are more ads to resolve for the current parsing.
        * @return {Boolean}
        */
+
+    }, {
+      key: "hasRemainingAds",
       value: function hasRemainingAds() {
         return this.vastParser.remainingAds.length > 0;
       }
@@ -3382,30 +3405,6 @@
             return reject(err);
           });
         });
-      }
-    }, {
-      key: "lastSuccessfulAd",
-      get: function get() {
-        return this.storage.getItem('vast-client-last-successful-ad');
-      },
-      set: function set(value) {
-        this.storage.setItem('vast-client-last-successful-ad', value);
-      }
-    }, {
-      key: "totalCalls",
-      get: function get() {
-        return this.storage.getItem('vast-client-total-calls');
-      },
-      set: function set(value) {
-        this.storage.setItem('vast-client-total-calls', value);
-      }
-    }, {
-      key: "totalCallsTimeout",
-      get: function get() {
-        return this.storage.getItem('vast-client-total-calls-timeout');
-      },
-      set: function set(value) {
-        this.storage.setItem('vast-client-total-calls-timeout', value);
       }
     }]);
 

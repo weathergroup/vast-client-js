@@ -126,7 +126,7 @@ function _isNativeReflectConstruct() {
   if (typeof Proxy === "function") return true;
 
   try {
-    Date.prototype.toString.call(Reflect.construct(Date, [], function () {}));
+    Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {}));
     return true;
   } catch (e) {
     return false;
@@ -281,8 +281,7 @@ function track(URLTemplates, macros, options) {
   var URLs = resolveURLTemplates(URLTemplates, macros, options);
   URLs.forEach(function (URL) {
     if (typeof window !== 'undefined' && window !== null) {
-      var i = new Image();
-      i.src = URL;
+      fetch(URL)["catch"](function () {});
     }
   });
 }
@@ -2387,7 +2386,7 @@ var https = require('https');
 
 var DOMParser = require('xmldom').DOMParser;
 
-function get(url, options, cb) {
+function get$2(url, options, cb) {
   url = uri.parse(url);
   var httpModule = url.protocol === 'https:' ? https : http;
 
@@ -2445,7 +2444,7 @@ function get(url, options, cb) {
 }
 
 var nodeURLHandler = {
-  get: get
+  get: get$2
 };
 
 function xhr() {
@@ -2526,7 +2525,7 @@ var XHRURLHandler = {
   supported: supported
 };
 
-function get$2(url, options, cb) {
+function get(url, options, cb) {
   // Allow skip of the options param
   if (!cb) {
     if (typeof options === 'function') {
@@ -2546,7 +2545,7 @@ function get$2(url, options, cb) {
 }
 
 var urlHandler = {
-  get: get$2
+  get: get
 };
 
 function createVASTResponse(_ref) {
@@ -3369,12 +3368,36 @@ var VASTClient = /*#__PURE__*/function () {
       return this.vastParser;
     }
   }, {
-    key: "hasRemainingAds",
-
+    key: "lastSuccessfulAd",
+    get: function get() {
+      return this.storage.getItem('vast-client-last-successful-ad');
+    },
+    set: function set(value) {
+      this.storage.setItem('vast-client-last-successful-ad', value);
+    }
+  }, {
+    key: "totalCalls",
+    get: function get() {
+      return this.storage.getItem('vast-client-total-calls');
+    },
+    set: function set(value) {
+      this.storage.setItem('vast-client-total-calls', value);
+    }
+  }, {
+    key: "totalCallsTimeout",
+    get: function get() {
+      return this.storage.getItem('vast-client-total-calls-timeout');
+    },
+    set: function set(value) {
+      this.storage.setItem('vast-client-total-calls-timeout', value);
+    }
     /**
      * Returns a boolean indicating if there are more ads to resolve for the current parsing.
      * @return {Boolean}
      */
+
+  }, {
+    key: "hasRemainingAds",
     value: function hasRemainingAds() {
       return this.vastParser.remainingAds.length > 0;
     }
@@ -3440,30 +3463,6 @@ var VASTClient = /*#__PURE__*/function () {
           return reject(err);
         });
       });
-    }
-  }, {
-    key: "lastSuccessfulAd",
-    get: function get() {
-      return this.storage.getItem('vast-client-last-successful-ad');
-    },
-    set: function set(value) {
-      this.storage.setItem('vast-client-last-successful-ad', value);
-    }
-  }, {
-    key: "totalCalls",
-    get: function get() {
-      return this.storage.getItem('vast-client-total-calls');
-    },
-    set: function set(value) {
-      this.storage.setItem('vast-client-total-calls', value);
-    }
-  }, {
-    key: "totalCallsTimeout",
-    get: function get() {
-      return this.storage.getItem('vast-client-total-calls-timeout');
-    },
-    set: function set(value) {
-      this.storage.setItem('vast-client-total-calls-timeout', value);
     }
   }]);
 
